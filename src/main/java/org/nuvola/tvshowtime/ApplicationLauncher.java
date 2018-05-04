@@ -29,6 +29,7 @@ import java.util.Timer;
 import java.util.TimerTask;
 import java.util.stream.Collectors;
 
+import org.nuvola.tvshowtime.business.database.Database;
 import org.nuvola.tvshowtime.business.plex.MediaContainer;
 import org.nuvola.tvshowtime.business.plex.User;
 import org.nuvola.tvshowtime.business.plex.Video;
@@ -84,6 +85,8 @@ public class ApplicationLauncher {
     @Scheduled(fixedDelay = Long.MAX_VALUE)
 	public void init() {
         tvShowTimeTemplate = new RestTemplate();
+
+        Database.createNewDatabase(pmsConfig.getDbpath(),pmsConfig.getDbfilename());
 
         File storeToken = new File(tvShowTimeConfig.getTokenFile());
         if (storeToken.exists()) {

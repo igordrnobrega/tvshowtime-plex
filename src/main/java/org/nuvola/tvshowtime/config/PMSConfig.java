@@ -28,6 +28,8 @@ public class PMSConfig {
     private String token;
     private String username;
     private boolean markall;
+    private String dbpath;
+    private String dbfilename;
 
     public String getPath() {
         return path;
@@ -59,5 +61,21 @@ public class PMSConfig {
 
     public void setMarkall(boolean markall) {
         this.markall = markall;
+    }
+
+    public String getDbpath() {
+        return dbpath;
+    }
+
+    public void setDbpath(String dbpath) {
+        this.dbpath = dbpath;
+    }
+
+    public String getDbfilename() {
+        return dbfilename;
+    }
+
+    public void setDbfilename(String dbfilename) {
+        this.dbfilename = dbfilename;
     }
 }

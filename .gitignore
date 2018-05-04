@@ -60,3 +60,6 @@ local.properties
 
 # Others
 *.log
+.mvn
+*.db
+config/
