@@ -78,15 +78,15 @@ public class ApplicationLauncher {
     private AccessToken accessToken;
     private Timer tokenTimer;
 
-	public static void main(String[] args) {
-		SpringApplication.run(ApplicationLauncher.class, args);
-	}
+    public static void main(String[] args) {
+        SpringApplication.run(ApplicationLauncher.class, args);
+    }
 
     @Scheduled(fixedDelay = Long.MAX_VALUE)
-	public void init() {
+    public void init() {
         tvShowTimeTemplate = new RestTemplate();
 
-        Database.createNewDatabase(pmsConfig.getDbpath(),pmsConfig.getDbfilename());
+        Database.createNewDatabase(pmsConfig.getDbpath(), pmsConfig.getDbfilename());
 
         File storeToken = new File(tvShowTimeConfig.getTokenFile());
         if (storeToken.exists()) {
@@ -217,7 +217,7 @@ public class ApplicationLauncher {
             LOG.info("Calling Plex with a X-Plex-Token...");
         }
 
-        ResponseEntity<MediaContainer> response =  pmsTemplate.getForEntity(watchHistoryUrl, MediaContainer.class);
+        ResponseEntity<MediaContainer> response = pmsTemplate.getForEntity(watchHistoryUrl, MediaContainer.class);
         MediaContainer mediaContainer = response.getBody();
 
         for (Video video : mediaContainer.getVideo()) {
@@ -230,6 +230,10 @@ public class ApplicationLauncher {
                 if (users.stream().count() == 0) {
                     continue;
                 }
+
+                for (User user : users) {
+                    Database.InsertUser(user);
+                }
             }
 
             // Mark as watched only today and yesterday episodes
@@ -241,7 +245,15 @@ public class ApplicationLauncher {
                             .append("E").append(video.getIndex())
                             .toString();
 
-                    markEpisodeAsWatched(episode);
+                    User user = video.getUser().get(0);
+
+                    if (!Database.CheckVideo(video, user)) {
+                        Database.InsertVideo(video, user);
+                        LOG.info(episode + " - " + user.getName());
+
+                        if (pmsConfig.getUsername().equals(user.getName()))
+                            markEpisodeAsWatched(episode, user);
+                    }
                 } else {
                     continue;
                 }
@@ -252,7 +264,7 @@ public class ApplicationLauncher {
         }
     }
 
-    private void markEpisodeAsWatched(String episode) {
+    private void markEpisodeAsWatched(String episode, User user) {
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_FORM_URLENCODED);
         headers.add("User-Agent", TVST_USER_AGENT);
